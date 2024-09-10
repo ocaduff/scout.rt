@@ -1221,7 +1221,7 @@ export class Calendar extends Widget implements CalendarModel {
   }
 
   protected _updateScrollbars($parent: JQuery, animate: boolean) {
-    let $scrollables = $('.calendar-scrollable-components > .resource-column', $parent);
+    let $scrollables = $('.calendar-scrollable-components .calendar-scrollable-components > .resource-column', $parent);
     $scrollables.each((i, elem) => {
       scrollbars.update($(elem), true);
     });
@@ -1303,13 +1303,11 @@ export class Calendar extends Widget implements CalendarModel {
   }
 
   protected _calculateFullDayIndexKey(component: CalendarComponent, date: Date): string {
-    let resourceId = this.defaultResource.resourceId;
-
-    if (component) {
-      resourceId = component.getResourceId();
+    let prefix = '';
+    if (this.isDay()) {
+      prefix = component.getResourceId();
     }
-
-    return resourceId + strings.asString(date.valueOf());
+    return prefix + date.valueOf();
   }
 
   layoutYearPanel() {
