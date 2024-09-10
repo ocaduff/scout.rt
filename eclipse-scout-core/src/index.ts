@@ -643,7 +643,6 @@ export * from './calendar/CalendarSidebarModel';
 export * from './calendar/CalendarSidebarSplitter';
 export * from './calendar/CalendarSidebarSplitterModel';
 export * from './calendar/CalendarSidebarSplitterEventMap';
-export * from './calendar/StaticTooltip';
 export * from './calendar/CalendarResourceLookupCall';
 export * from './calendar/ResourcePanelTreeNode';
 export * from './calendar/ResourcePanelTreeNodeModel';

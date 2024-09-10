@@ -7,13 +7,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import {
-  arrays, CalendarResourceLookupCall, HtmlComponent, InitModelOf, LookupRow, ObjectOrModel, ResourcePanelTreeNode, scout, SingleLayout, StaticTooltip, tooltips, Tree, TreeBox, TreeBoxTreeNode, TreeNode, TreeNodesCheckedEvent, Widget
-} from '../index';
+import {arrays, CalendarResourceLookupCall, HtmlComponent, InitModelOf, LookupRow, ObjectOrModel, ResourcePanelTreeNode, scout, SingleLayout, Tree, TreeBox, TreeBoxTreeNode, TreeNode, TreeNodesCheckedEvent, Widget} from '../index';
 
 export class ResourcePanel extends Widget {
   treeBox: ResourcePanelTreeBox;
-  tooltipSupport: StaticTooltip;
 
   protected override _init(model: InitModelOf<this>) {
     super._init(model);
@@ -44,29 +41,14 @@ export class ResourcePanel extends Widget {
 class ResourcePanelTreeBox extends TreeBox<string> {
   declare tree: ResourcePanelTree;
   declare lookupCall: CalendarResourceLookupCall;
-  tooltipSupport: StaticTooltip;
 
   protected override _render() {
     super._render();
     this.removeMandatoryIndicator();
-    this._installTooltipSupport();
-  }
-
-  protected override _remove() {
-    super._remove();
-    this.tooltipSupport.close();
   }
 
   protected override _renderFocused() {
     // NOP
-  }
-
-  protected _installTooltipSupport() {
-    let model = {
-      parent: this,
-      text: '${textKey:ui.AtLeastOneCalendarHasToBeVisible}'
-    };
-    this.tooltipSupport = new StaticTooltip(model);
   }
 
   protected override _createNode(lookupRow: LookupRow<string>): TreeBoxTreeNode<string> {
@@ -76,29 +58,18 @@ class ResourcePanelTreeBox extends TreeBox<string> {
   }
 
   protected override _onTreeNodesChecked(event: TreeNodesCheckedEvent) {
-    this._closeTooltip();
     // Make impossible to uncheck all nodes
     if (arrays.hasElements(this.tree.checkedNodes)) {
       super._onTreeNodesChecked(event);
     } else if (!this._populating) {
       // Reapply the value to the tree
       this._syncValueToTree(this.value);
-      this._createImpossibleToUncheckTooltip(event.nodes[0]);
+      this._triggerShakeAnimation(event.nodes[0]);
     }
   }
 
-  protected _createImpossibleToUncheckTooltip(node: TreeNode) {
-    if (this.tooltipSupport) {
-      // Clear possible ellipsis tooltip of the tree
-      tooltips.find(this.tree.$data).forEach(tooltip => tooltip.destroy());
-      this.tooltipSupport.open(node.$node.children('.tree-node-checkbox'));
-    }
-  }
-
-  protected _closeTooltip() {
-    if (this.tooltipSupport) {
-      this.tooltipSupport.close();
-    }
+  protected _triggerShakeAnimation(node: TreeNode) {
+    node.$node.children('.tree-node-checkbox').addClassForAnimation('animate-unable-uncheck');
   }
 }
 
@@ -107,5 +78,10 @@ class ResourcePanelTree extends Tree {
 
   override insertNode(node: ObjectOrModel<ResourcePanelTreeNode>, parentNode?: ResourcePanelTreeNode, index?: number) {
     super.insertNode(node, parentNode, index);
+  }
+
+  protected override _render() {
+    super._render();
+    this.$container.addClass('resource-panel-tree');
   }
 }
