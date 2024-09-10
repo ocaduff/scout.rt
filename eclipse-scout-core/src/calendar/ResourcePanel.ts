@@ -22,6 +22,7 @@ export class ResourcePanel extends Widget {
       statusVisible: false,
       tree: {
         objectType: ResourcePanelTree,
+        cssClass: 'resource-panel-tree',
         checkable: true,
         textFilterEnabled: false,
         _scrollDirections: 'y',
@@ -78,10 +79,5 @@ class ResourcePanelTree extends Tree {
 
   override insertNode(node: ObjectOrModel<ResourcePanelTreeNode>, parentNode?: ResourcePanelTreeNode, index?: number) {
     super.insertNode(node, parentNode, index);
-  }
-
-  protected override _render() {
-    super._render();
-    this.$container.addClass('resource-panel-tree');
   }
 }
