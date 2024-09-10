@@ -44,6 +44,7 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.StandardCookieSpec;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.core5.pool.PoolStats;
 import org.apache.hc.core5.util.Timeout;
 import org.eclipse.scout.rt.dataobject.DoEntityBuilder;
 import org.eclipse.scout.rt.dataobject.IDataObjectMapper;
@@ -550,7 +551,7 @@ public class ScoutApacheConnectorTest {
       HttpClientMetricsHelper mock = Mockito.mock(HttpClientMetricsHelper.class);
       beans.add(BEANS.get(BeanTestingHelper.class).registerBean(new BeanMetaData(HttpClientMetricsHelper.class, mock)));
       new ScoutApacheConnector(client, config);
-      verify(mock, never()).initMetrics(any(Meter.class), any(), any(), any(), any());
+      verify(mock, never()).initMetrics(any(Meter.class), any(), any());
     }
     finally {
       beans.forEach(BeanTestingHelper.get()::unregisterBean);
@@ -567,16 +568,14 @@ public class ScoutApacheConnectorTest {
     List<IBean<?>> beans = new ArrayList<>();
     try {
       HttpClientMetricsHelper mock = Mockito.mock(HttpClientMetricsHelper.class);
-      @SuppressWarnings("unchecked") ArgumentCaptor<Supplier<Integer>> idleCaptor = ArgumentCaptor.forClass(Supplier.class);
-      @SuppressWarnings("unchecked") ArgumentCaptor<Supplier<Integer>> activeCaptor = ArgumentCaptor.forClass(Supplier.class);
-      @SuppressWarnings("unchecked") ArgumentCaptor<Supplier<Integer>> maxCaptor = ArgumentCaptor.forClass(Supplier.class);
+      @SuppressWarnings("unchecked") ArgumentCaptor<Supplier<PoolStats>> poolStatsCaptor = ArgumentCaptor.forClass(Supplier.class);
       beans.add(BEANS.get(BeanTestingHelper.class).registerBean(new BeanMetaData(HttpClientMetricsHelper.class, mock)));
       new ScoutApacheConnector(client, config);
 
-      verify(mock, only()).initMetrics(any(Meter.class), eq("mock-http-client-name"), idleCaptor.capture(), activeCaptor.capture(), maxCaptor.capture());
-      assertEquals(Integer.valueOf(0), idleCaptor.getValue().get());
-      assertEquals(Integer.valueOf(0), activeCaptor.getValue().get());
-      assertEquals(Integer.valueOf(123), maxCaptor.getValue().get());
+      verify(mock, only()).initMetrics(any(Meter.class), eq("mock-http-client-name"), poolStatsCaptor.capture());
+      assertEquals(0, poolStatsCaptor.getValue().get().getAvailable());
+      assertEquals(0, poolStatsCaptor.getValue().get().getLeased());
+      assertEquals(123, poolStatsCaptor.getValue().get().getMax());
     }
     finally {
       beans.forEach(BeanTestingHelper.get()::unregisterBean);
